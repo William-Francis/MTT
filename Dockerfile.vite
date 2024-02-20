@@ -1,0 +1,31 @@
+FROM node:20 as base
+
+RUN npm -g i pnpm
+
+ARG USER=user
+ARG PORT=3000
+ARG USER_UID=1001
+ARG PROJECT_NAME=mtt
+ARG DJANGO_BASE_DIR=/usr/src/$PROJECT_NAME
+
+
+ENV \
+	USER=$USER \
+	USER_UID=$USER_UID \
+	DJANGO_BASE_DIR=$DJANGO_BASE_DIR \
+	PROJECT_NAME=$PROJECT_NAME
+
+COPY docker-entrypoint-vite.sh /docker-entrypoint.sh
+COPY docker-cmd-vite.sh /docker-cmd.sh
+
+COPY $PROJECT_NAME $DJANGO_BASE_DIR
+
+# User
+RUN chmod +x /docker-entrypoint.sh /docker-cmd.sh
+
+WORKDIR $DJANGO_BASE_DIR
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/docker-cmd.sh"]
+
+EXPOSE $PORT
